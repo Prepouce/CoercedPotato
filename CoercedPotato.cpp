@@ -362,6 +362,18 @@ int main(int argc, char** argv)
     long result = callRpcAsyncOpenPrinter(RPCBind, namedpipe);
 
     */
+
+    std::cout << "                                                                  " << std::endl;
+    std::cout << "   ____                            _ ____       _        _        " << std::endl;
+    std::cout << "  / ___|___   ___ _ __ ___ ___  __| |  _ \\ ___ | |_ __ _| |_ ___  " << std::endl;
+    std::cout << " | |   / _ \\ / _ \\ '__/ __/ _ \\/ _` | |_) / _ \\| __/ _` | __/ _ \\ " << std::endl;
+    std::cout << " | |__| (_) |  __/ | | (_|  __/ (_| |  __/ (_) | || (_| | || (_) |" << std::endl;
+    std::cout << "  \\____\\___/ \\___|_|  \\___\\___|\\__,_|_|   \\___/ \\__\\__,_|\\__\\___/ " << std::endl;
+    std::cout << "                                                                  " << std::endl;
+    std::cout << "                                           @Hack0ura @Prepouce    " << std::endl;
+    std::cout << "                                                                  " << std::endl;
+
+
     CLI::App app{ "CoercedPotato is an automated tool for privilege escalation exploit using SeImpersonatePrivilege or SeImpersonatePrimaryToken." };
 
     if (argc == 1) {
