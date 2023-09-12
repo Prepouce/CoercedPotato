@@ -21,9 +21,18 @@
     <ClCompile Include="MS-EFSR_df1941c5-fe89-4e79-bf10-463657acf44d_c.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="ms-rprn_c.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MS-EFSR_df1941c5-fe89-4e79-bf10-463657acf44d_h.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="ms-rprn_h.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="CLI11.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
