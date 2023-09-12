@@ -383,13 +383,14 @@ int main(int argc, char** argv)
     }
 
     std::string stringCommand;
+
     app.add_option("-c,--command", stringCommand, "Program to execute as SYSTEM (i.e. cmd.exe)")->required();
 
     std::string rpcInterface;
     app.add_option("-i,--interface", rpcInterface, "Optionnal interface to use (default : ALL) (Possible values : ms-rprn, ms-par, ms-efsr");
 
     int exploitId = -1;
-    app.add_option("-n,--exploitId", exploitId, "Optionnal exploit ID (Only usuable if interface is defined) \n -> ms-rprn : \n   [0] RpcRemoteFindFirstPrinterChangeNotificationEx()\n   [1] RpcRemoteFindFirstPrinterChangeNotification()\n -> ms-par : 0->1 \n -> ms-efsr \n   [0] EfsRpcOpenFileRaw()\n   [1] EfsRpcEncryptFileSrv()\n   [2] EfsRpcDecryptFileSrv()\n   [3] EfsRpcQueryUsersOnFile()\n   [4] EfsRpcQueryRecoveryAgents()\n   [5] EfsRpcRemoveUsersFromFile()\n   [6] EfsRpcAddUsersToFile()\n   [7] EfsRpcFileKeyInfo() # NOT WORKING\n   [8] EfsRpcDuplicateEncryptionInfoFile()\n   [9] EfsRpcAddUsersToFileEx()\n   [10] EfsRpcFileKeyInfoEx() # NOT WORKING\n   [11] EfsRpcGetEncryptedFileMetadata()\n   [12] EfsRpcEncryptFileExSrv()\n   [13] EfsRpcQueryProtectors()\n");
+    app.add_option("-n,--exploitId", exploitId, "Optionnal exploit ID (Only usuable if interface is defined) \n -> ms-rprn : \n   [0] RpcRemoteFindFirstPrinterChangeNotificationEx()\n   [1] RpcRemoteFindFirstPrinterChangeNotification()\n -> ms-efsr \n   [0] EfsRpcOpenFileRaw()\n   [1] EfsRpcEncryptFileSrv()\n   [2] EfsRpcDecryptFileSrv()\n   [3] EfsRpcQueryUsersOnFile()\n   [4] EfsRpcQueryRecoveryAgents()\n   [5] EfsRpcRemoveUsersFromFile()\n   [6] EfsRpcAddUsersToFile()\n   [7] EfsRpcFileKeyInfo() # NOT WORKING\n   [8] EfsRpcDuplicateEncryptionInfoFile()\n   [9] EfsRpcAddUsersToFileEx()\n   [10] EfsRpcFileKeyInfoEx() # NOT WORKING\n   [11] EfsRpcGetEncryptedFileMetadata()\n   [12] EfsRpcEncryptFileExSrv()\n   [13] EfsRpcQueryProtectors()\n");
 
     bool force = false;
     app.add_option("-f,--force", force, "Force all RPC functions even if it says 'Exploit worked!' (Default value : false)");

@@ -140,9 +140,6 @@
     <ClInclude Include="ms-par_h.h" />
     <ClInclude Include="ms-rprn_h.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Midl Include="ms-par.idl" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -48,9 +48,4 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <Midl Include="ms-par.idl">
-      <Filter>Fichiers sources</Filter>
-    </Midl>
-  </ItemGroup>
 </Project>
