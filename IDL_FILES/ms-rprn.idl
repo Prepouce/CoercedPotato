@@ -56,6 +56,15 @@ interface winspool
 	typedef void * PVOID, * LPVOID;
 	typedef unsigned short WORD, * PWORD, * LPWORD;
 
+    typedef struct _GUID {
+   unsigned long Data1;
+   unsigned short Data2;
+   unsigned short Data3;
+   byte Data4[8];
+ } GUID, 
+   UUID, 
+  *PGUID;
+
 	typedef unsigned short LANGID;
 	typedef [context_handle] void* GDI_HANDLE;
 	typedef [context_handle] void* PRINTER_HANDLE;

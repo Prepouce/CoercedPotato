@@ -6,7 +6,7 @@
  /* File created by MIDL compiler version 8.01.0628 */
 /* at Mon Jan 18 19:14:07 2038
  */
-/* Compiler settings for ms-rprn.idl:
+/* Compiler settings for IDL_FILES\ms-rprn.idl:
     Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.01.0628 
     protocol : all , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
@@ -8030,7 +8030,7 @@ static const RPC_DISPATCH_TABLE winspool_v1_0_DispatchTable =
  /* File created by MIDL compiler version 8.01.0628 */
 /* at Mon Jan 18 19:14:07 2038
  */
-/* Compiler settings for ms-rprn.idl:
+/* Compiler settings for IDL_FILES\ms-rprn.idl:
     Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.01.0628 
     protocol : all , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 

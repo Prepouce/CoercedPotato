@@ -130,15 +130,19 @@
     <ClCompile Include="CoercedPotato.cpp" />
     <ClCompile Include="CoerceFunctions.cpp" />
     <ClCompile Include="ms-efsr_c.c" />
+    <ClCompile Include="ms-even_c.c" />
     <ClCompile Include="ms-par_c.c" />
     <ClCompile Include="ms-rprn_c.c" />
+    <ClCompile Include="ms-srvsvc_c.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CLI11.hpp" />
     <ClInclude Include="CoerceFunctions.h" />
     <ClInclude Include="ms-efsr_h.h" />
+    <ClInclude Include="ms-even_h.h" />
     <ClInclude Include="ms-par_h.h" />
     <ClInclude Include="ms-rprn_h.h" />
+    <ClInclude Include="ms-srvsvc_h.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

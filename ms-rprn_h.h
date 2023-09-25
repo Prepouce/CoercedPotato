@@ -6,7 +6,7 @@
  /* File created by MIDL compiler version 8.01.0628 */
 /* at Mon Jan 18 19:14:07 2038
  */
-/* Compiler settings for ms-rprn.idl:
+/* Compiler settings for IDL_FILES\ms-rprn.idl:
     Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.01.0628 
     protocol : all , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
@@ -191,6 +191,11 @@ typedef unsigned short *PWORD;
 
 typedef unsigned short *LPWORD;
 
+
+typedef struct _GUID UUID;
+
+typedef struct _GUID *PGUID;
+
 typedef unsigned short LANGID;
 
 typedef /* [context_handle] */ void *GDI_HANDLE;
@@ -199,6 +204,13 @@ typedef /* [context_handle] */ void *PRINTER_HANDLE;
 
 typedef /* [handle] */ wchar_t *STRING_HANDLE;
 
+
+typedef struct _FILETIME *PFILETIME;
+
+typedef struct _FILETIME *LPFILETIME;
+
+
+typedef struct _SYSTEMTIME *PSYSTEMTIME;
 
 typedef struct _RPC_DRIVER_INFO_3
     {
@@ -341,6 +353,7 @@ typedef struct _PRINTER_INFO_STRESS
     DWORD dwReserved2;
     DWORD dwReserved3;
     } 	PRINTER_INFO_STRESS;
+
 
 typedef struct _SPLCLIENT_INFO_1
     {

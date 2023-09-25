@@ -1,0 +1,327 @@
+[
+    uuid(82273FDC-E32A-18C3-3F78-827929DC23EA),
+        version(0.0),
+#ifdef __midl
+        ms_union,
+#endif // __midl
+
+        pointer_default(unique)
+]
+
+
+interface eventlog
+{
+    // the following line(s) commented out to avoid redefinition of MS-DTYP types
+    //typedef long NTSTATUS;
+
+#define MAX_STRINGS      0x00000100
+#define MAX_SINGLE_EVENT 0x0003FFFF
+#define MAX_BATCH_BUFF   0x0007FFFF
+    typedef long NTSTATUS;
+    typedef unsigned short wchar_t;
+    typedef void* ADCONNECTION_HANDLE;
+    typedef int BOOL, * PBOOL, * LPBOOL;
+    typedef unsigned char BYTE, * PBYTE, * LPBYTE;
+    typedef BYTE BOOLEAN, * PBOOLEAN;
+    typedef wchar_t WCHAR, * PWCHAR;
+    typedef WCHAR* BSTR;
+    typedef char CHAR, * PCHAR;
+    typedef double DOUBLE;
+    typedef unsigned long ULONG, * PULONG;
+    typedef unsigned long DWORD, * PDWORD, * LPDWORD;
+    typedef unsigned int DWORD32;
+    typedef unsigned __int64 DWORD64, * PDWORD64;
+    typedef unsigned __int64 ULONGLONG;
+    typedef ULONGLONG DWORDLONG, * PDWORDLONG;
+    typedef unsigned long error_status_t;
+    typedef float FLOAT;
+    typedef unsigned char UCHAR, * PUCHAR;
+    typedef short SHORT;
+
+
+    typedef struct _RPC_UNICODE_STRING {
+        unsigned short Length;
+        unsigned short MaximumLength;
+        [size_is(MaximumLength / 2), length_is(Length / 2)]
+            WCHAR* Buffer;
+    } RPC_UNICODE_STRING,
+        * PRPC_UNICODE_STRING;
+
+    typedef struct _FILETIME {
+        DWORD dwLowDateTime;
+        DWORD dwHighDateTime;
+    } FILETIME,
+        * PFILETIME,
+        * LPFILETIME;
+
+    typedef struct _RPC_SID_IDENTIFIER_AUTHORITY {
+        byte Value[6];
+    } RPC_SID_IDENTIFIER_AUTHORITY;
+
+    typedef struct _RPC_SID {
+        unsigned char Revision;
+        unsigned char SubAuthorityCount;
+        RPC_SID_IDENTIFIER_AUTHORITY IdentifierAuthority;
+        [size_is(SubAuthorityCount)] unsigned long SubAuthority[];
+    } RPC_SID,
+        * PRPC_SID,
+        * PSID;
+
+    typedef struct _RPC_STRING
+    {
+        unsigned short Length;
+        unsigned short MaximumLength;
+        [size_is(MaximumLength)] char* Buffer;
+    } RPC_STRING, * PRPC_STRING;
+
+    typedef struct _RPC_CLIENT_ID {
+        unsigned long UniqueProcess;
+        unsigned long UniqueThread;
+    } RPC_CLIENT_ID, * PRPC_CLIENT_ID;
+
+    typedef [handle, unique] wchar_t* EVENTLOG_HANDLE_W;
+    typedef [handle, unique] char* EVENTLOG_HANDLE_A;
+    typedef [context_handle] void* IELF_HANDLE;
+    typedef [context_handle] void** PIELF_HANDLE;
+    typedef [range(0, MAX_BATCH_BUFF)] unsigned long RULONG;
+
+
+    NTSTATUS
+        ElfrClearELFW(
+            [in]           IELF_HANDLE LogHandle,
+            [in, unique]    PRPC_UNICODE_STRING BackupFileName
+        );
+
+    NTSTATUS
+        ElfrBackupELFW(
+            [in]         IELF_HANDLE LogHandle,
+            [in]         PRPC_UNICODE_STRING BackupFileName
+        );
+
+    NTSTATUS
+        ElfrCloseEL(
+            [in, out]        IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrDeregisterEventSource(
+            [in, out]        IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrNumberOfRecords(
+            [in]            IELF_HANDLE         LogHandle,
+            [out]           unsigned long* NumberOfRecords
+        );
+
+    NTSTATUS
+        ElfrOldestRecord(
+            [in]            IELF_HANDLE         LogHandle,
+            [out]           unsigned long* OldestRecordNumber
+        );
+
+    NTSTATUS
+        ElfrChangeNotify(
+            [in]  IELF_HANDLE         LogHandle,
+            [in]  RPC_CLIENT_ID       ClientId,
+            [in]  ULONG               Event
+        );
+
+    NTSTATUS
+        ElfrOpenELW(
+            [in]    EVENTLOG_HANDLE_W UNCServerName,
+            [in]           PRPC_UNICODE_STRING ModuleName,
+            [in]           PRPC_UNICODE_STRING RegModuleName,
+            [in]           unsigned long MajorVersion,
+            [in]           unsigned long MinorVersion,
+            [out]          IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrRegisterEventSourceW(
+            [in]          EVENTLOG_HANDLE_W UNCServerName,
+            [in]          PRPC_UNICODE_STRING ModuleName,
+            [in]          PRPC_UNICODE_STRING RegModuleName,
+            [in]          unsigned long MajorVersion,
+            [in]          unsigned long MinorVersion,
+            [out]         IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrOpenBELW(
+            [in]          EVENTLOG_HANDLE_W UNCServerName,
+            [in]          PRPC_UNICODE_STRING BackupFileName,
+            [in]          unsigned long MajorVersion,
+            [in]          unsigned long MinorVersion,
+            [out]         IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrReadELW(
+            [in]         IELF_HANDLE     LogHandle,
+            [in]         unsigned long ReadFlags,
+            [in]         unsigned long RecordOffset,
+            [in]         RULONG NumberOfBytesToRead,
+            [out, size_is(NumberOfBytesToRead)] unsigned char* Buffer,
+            [out]        unsigned long* NumberOfBytesRead,
+            [out]        unsigned long* MinNumberOfBytesNeeded
+        );
+
+    NTSTATUS
+        ElfrReportEventW(
+            [in]         IELF_HANDLE LogHandle,
+            [in]         unsigned long Time,
+            [in]         unsigned short EventType,
+            [in]         unsigned short EventCategory,
+            [in]         unsigned long EventID,
+            [in, range(0, 256)]       unsigned short NumStrings,
+            [in, range(0, 61440)]  unsigned long DataSize,
+            [in]         PRPC_UNICODE_STRING ComputerName,
+            [in, unique] PRPC_SID UserSID,
+            [in, size_is(NumStrings), unique] PRPC_UNICODE_STRING Strings[*],
+            [in, size_is(DataSize), unique] unsigned char* Data,
+            [in]         unsigned short Flags,
+            [in, out, unique] unsigned long* RecordNumber,
+            [in, out, unique] unsigned long* TimeWritten
+        );
+
+    NTSTATUS
+        ElfrClearELFA(
+            [in]         IELF_HANDLE LogHandle,
+            [in, unique]  PRPC_STRING BackupFileName
+        );
+
+    NTSTATUS
+        ElfrBackupELFA(
+            [in]         IELF_HANDLE LogHandle,
+            [in]         PRPC_STRING BackupFileName
+        );
+
+    NTSTATUS
+        ElfrOpenELA(
+            [in]     EVENTLOG_HANDLE_A UNCServerName,
+            [in]     PRPC_STRING ModuleName,
+            [in]     PRPC_STRING RegModuleName,
+            [in]     unsigned long MajorVersion,
+            [in]     unsigned long MinorVersion,
+            [out]    IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrRegisterEventSourceA(
+            [in]     EVENTLOG_HANDLE_A UNCServerName,
+            [in]     PRPC_STRING ModuleName,
+            [in]     PRPC_STRING RegModuleName,
+            [in]     unsigned long MajorVersion,
+            [in]     unsigned long MinorVersion,
+            [out]    IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrOpenBELA(
+            [in]     EVENTLOG_HANDLE_A UNCServerName,
+            [in]     PRPC_STRING BackupFileName,
+            [in]     unsigned long MajorVersion,
+            [in]     unsigned long MinorVersion,
+            [out]    IELF_HANDLE* LogHandle
+        );
+
+    NTSTATUS
+        ElfrReadELA(
+            [in]    IELF_HANDLE LogHandle,
+            [in]    unsigned long ReadFlags,
+            [in]    unsigned long RecordOffset,
+            [in]    RULONG NumberOfBytesToRead,
+            [out, size_is(NumberOfBytesToRead)] unsigned char* Buffer,
+            [out]   unsigned long* NumberOfBytesRead,
+            [out]   unsigned long* MinNumberOfBytesNeeded
+        );
+
+
+    NTSTATUS
+        ElfrReportEventA(
+            [in]    IELF_HANDLE LogHandle,
+            [in]    unsigned long Time,
+            [in]    unsigned short EventType,
+            [in]    unsigned short EventCategory,
+            [in]    unsigned long EventID,
+            [in, range(0, 256)]    unsigned short NumStrings,
+            [in, range(0, 61440)]    unsigned long DataSize,
+            [in]    PRPC_STRING ComputerName,
+            [in, unique] PRPC_SID UserSID,
+            [in, size_is(NumStrings), unique] PRPC_STRING Strings[*],
+            [in, size_is(DataSize), unique] unsigned char* Data,
+            [in]    unsigned short Flags,
+            [in, out, unique] unsigned long* RecordNumber,
+            [in, out, unique] unsigned long* TimeWritten
+        );
+
+    void Opnum19NotUsedOnWire(void);
+    void Opnum20NotUsedOnWire(void);
+    void Opnum21NotUsedOnWire(void);
+
+    NTSTATUS
+        ElfrGetLogInformation(
+            [in]     IELF_HANDLE             LogHandle,
+            [in]     unsigned long                   InfoLevel,
+            [out, size_is(cbBufSize)] unsigned char* lpBuffer,
+            [in, range(0, 1024)]      unsigned long  cbBufSize,
+            [out]    unsigned long* pcbBytesNeeded
+        );
+
+    void Opnum23NotUsedOnWire(void);
+
+    NTSTATUS
+        ElfrReportEventAndSourceW(
+            [in]         IELF_HANDLE LogHandle,
+            [in]         unsigned long Time,
+            [in]         unsigned short EventType,
+            [in]         unsigned short EventCategory,
+            [in]         unsigned long EventID,
+            [in]         PRPC_UNICODE_STRING SourceName,
+            [in, range(0, 256)]         unsigned short NumStrings,
+            [in, range(0, 61440)]         unsigned long DataSize,
+            [in]         PRPC_UNICODE_STRING ComputerName,
+            [in, unique] PRPC_SID UserSID,
+            [in, size_is(NumStrings), unique] PRPC_UNICODE_STRING Strings[*],
+            [in, size_is(DataSize), unique] unsigned char* Data,
+            [in]         unsigned short Flags,
+            [in, out, unique] unsigned long* RecordNumber,
+            [in, out, unique] unsigned long* TimeWritten
+        );
+
+    NTSTATUS ElfrReportEventExW(
+        [in] IELF_HANDLE LogHandle,
+        [in] PFILETIME TimeGenerated,
+        [in] unsigned short EventType,
+        [in] unsigned short EventCategory,
+        [in] unsigned long EventID,
+        [in, range(0, 256)] unsigned short NumStrings,
+        [in, range(0, 61440)] unsigned long DataSize,
+        [in] PRPC_UNICODE_STRING ComputerName,
+        [in, unique] PRPC_SID UserSID,
+        [in, size_is(NumStrings), unique] PRPC_UNICODE_STRING Strings[*],
+        [in, size_is(DataSize), unique] unsigned char* Data,
+        [in] unsigned short Flags,
+        [in, out, unique] unsigned long* RecordNumber
+    );
+
+    NTSTATUS ElfrReportEventExA(
+        [in] IELF_HANDLE LogHandle,
+        [in] PFILETIME TimeGenerated,
+        [in] unsigned short EventType,
+        [in] unsigned short EventCategory,
+        [in] unsigned long EventID,
+        [in, range(0, 256)] unsigned short NumStrings,
+        [in, range(0, 61440)] unsigned long DataSize,
+        [in] PRPC_STRING ComputerName,
+        [in, unique] PRPC_SID UserSID,
+        [in, size_is(NumStrings), unique] PRPC_STRING Strings[*],
+        [in, size_is(DataSize), unique] unsigned char* Data,
+        [in] unsigned short Flags,
+        [in, out, unique] unsigned long* RecordNumber
+    );
+
+
+
+}
