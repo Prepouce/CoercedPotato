@@ -27,7 +27,7 @@
 
 #include <string.h>
 
-#include "ms-efsr_h.h"
+#include "../lib/ms-efsr_h.h"
 
 #define TYPE_FORMAT_STRING_SIZE   1153                              
 #define PROC_FORMAT_STRING_SIZE   2637                              

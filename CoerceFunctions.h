@@ -5,8 +5,8 @@
 #include <rpc.h> 
 #include <strsafe.h>
 
-#include "ms-efsr_h.h"
-#include "ms-rprn_h.h"
+#include "lib/ms-efsr_h.h"
+#include "lib/ms-rprn_h.h"
 
 
 long callEfsRpcOpenFileRaw(RPC_BINDING_HANDLE Binding, LPWSTR targetedPipeName);
@@ -28,3 +28,8 @@ long callRpcRemoteFindFirstPrinterChangeNotification(wchar_t* targetedPipeName);
 long callRpcRemoteFindFirstPrinterChangeNotificationEx(wchar_t* targetedPipeName);
 
 long callRpcAsyncOpenPrinter(RPC_BINDING_HANDLE Binding, wchar_t* targetedPipeName);
+
+long callNetrFileGetInfo(wchar_t* targetedPipeName);
+long callNetrShareGetInfo(wchar_t* targetedPipeName);
+long callNetrpGetFileSecurity(wchar_t* targetedPipeName);
+long callNetprNameValidate(wchar_t* targetedPipeName);

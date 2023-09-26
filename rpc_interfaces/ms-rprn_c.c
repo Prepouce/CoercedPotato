@@ -29,7 +29,7 @@
 
 #include <string.h>
 
-#include "ms-rprn_h.h"
+#include "../lib/ms-rprn_h.h"
 
 #define TYPE_FORMAT_STRING_SIZE   2497                              
 #define PROC_FORMAT_STRING_SIZE   6329                              

