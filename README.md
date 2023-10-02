@@ -1,12 +1,20 @@
 # Coerced potato
 
-From LOCAL/NETWORK SERVICE to SYSTEM by abusing `SeImpersonatePrivilege` on Windows 10, Windows 11 and Server 2022.
+From Patate (LOCAL/NETWORK SERVICE) to SYSTEM by abusing `SeImpersonatePrivilege` on Windows 10, Windows 11 and Server 2022.
 
 For more information: an article is coming very soon :D
+
+A very quick PoooooC:
+
+```txt
+.\CoercedPotato.exe -c whoami
+```
+An other PoC with an interactive shell:
 
 <p align="center">
   <img src="poc.png">
 </p>
+
 
 ## Usage
 
