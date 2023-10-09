@@ -2,7 +2,7 @@
 
 From Patate (LOCAL/NETWORK SERVICE) to SYSTEM by abusing `SeImpersonatePrivilege` on Windows 10, Windows 11 and Server 2022.
 
-For more information: an article is coming very soon :D
+For more information: [https://blog.hackvens.fr/articles/CoercedPotato.html](https://blog.hackvens.fr/articles/CoercedPotato.html)
 
 A very quick PoooooC:
 
