@@ -62,6 +62,7 @@ Options:
                               
   -f,--force BOOLEAN          Force all RPC functions even if it says 'Exploit worked!' (Default value : false)
   --interactive BOOLEAN       Set wether the process should be run within the same shell or open a new window. (Default value : true)
-                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                ```
+```
+
+
 Made in France 🇫🇷 with <3
