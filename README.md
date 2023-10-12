@@ -1,12 +1,23 @@
 # Coerced potato
 
-From LOCAL/NETWORK SERVICE to SYSTEM by abusing `SeImpersonatePrivilege` on Windows 10, Windows 11 and Server 2022.
+From Patate (LOCAL/NETWORK SERVICE) to SYSTEM by abusing `SeImpersonatePrivilege` on Windows 10, Windows 11 and Server 2022.
 
-For more information: an article is coming very soon :D
+For more information: [https://blog.hackvens.fr/articles/CoercedPotato.html](https://blog.hackvens.fr/articles/CoercedPotato.html)
 
+A very quick PoooooC:
+
+```txt
+.\CoercedPotato.exe -c whoami
+```
+An other PoC with an interactive shell:
+
+```txt
+.\CoercedPotato.exe -c cmd.exe
+```
 <p align="center">
   <img src="poc.png">
 </p>
+
 
 ## Usage
 
@@ -53,11 +64,3 @@ Options:
   --interactive BOOLEAN       Set wether the process should be run within the same shell or open a new window. (Default value : true)
                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                 ```
-
-Usage : Spawn a SYSTEM process and interact with it
-
-If you have an __interactive__ shell, you can create a new SYSTEM process in your current console.
-
-__Use case__: bind shell, reverse shell, `psexec.py`, etc.
-
-       .\CoercedPotato.exe -c cmd.exe
