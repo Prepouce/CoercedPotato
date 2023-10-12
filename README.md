@@ -64,3 +64,4 @@ Options:
   --interactive BOOLEAN       Set wether the process should be run within the same shell or open a new window. (Default value : true)
                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                 ```
+Made in France 🇫🇷 with <3
