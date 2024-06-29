@@ -131,12 +131,14 @@
     <ClCompile Include="CoerceFunctions.cpp" />
     <ClCompile Include="rpc_interfaces\ms-efsr_c.c" />
     <ClCompile Include="rpc_interfaces\ms-rprn_c.c" />
+    <ClCompile Include="win32errorcodes\c\win32errors.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CLI11.hpp" />
     <ClInclude Include="CoerceFunctions.h" />
     <ClInclude Include="lib\ms-efsr_h.h" />
     <ClInclude Include="lib\ms-rprn_h.h" />
+    <ClInclude Include="win32errorcodes\c\win32errors.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
