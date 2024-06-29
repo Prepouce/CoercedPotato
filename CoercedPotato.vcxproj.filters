@@ -27,6 +27,9 @@
     <ClCompile Include="rpc_interfaces\ms-rprn_c.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="win32errorcodes\c\win32errors.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CLI11.hpp">
@@ -39,6 +42,9 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="lib\ms-rprn_h.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="win32errorcodes\c\win32errors.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

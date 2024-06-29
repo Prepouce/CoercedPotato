@@ -70,7 +70,6 @@ void handleError(std::wstring function, long result) {
 
 BOOL createRPCbind(RPC_BINDING_HANDLE& binding_h)
 {
-
     RPC_STATUS status;
     RPC_WSTR NetworkAddr = (RPC_WSTR)L"\\\\localhost";
 
