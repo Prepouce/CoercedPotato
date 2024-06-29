@@ -1,3 +1,0 @@
-[submodule "win32errorcodes"]
-	path = win32errorcodes
-	url = https://github.com/p0dalirius/win32errorcodes
