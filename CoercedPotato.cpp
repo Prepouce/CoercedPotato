@@ -588,7 +588,7 @@ handle_t __RPC_USER STRING_HANDLE_bind(STRING_HANDLE lpStr)
     RpcStringFreeW(&StringBinding);
 
     if (RpcStatus != RPC_S_OK) {
-        wprintf(L"[-] An error has occurred during STRING_HANDLE_bind()...\r\n");
+        wprintf(L"[-] An error has occurred during STRING_HANDLE_bind() ...\r\n");
         return(0);
     }
 
@@ -600,7 +600,7 @@ void __RPC_USER STRING_HANDLE_unbind(STRING_HANDLE lpStr, handle_t BindingHandle
     RPC_STATUS       RpcStatus;
 
     RpcStatus = RpcBindingFree(&BindingHandle);
-    if (RpcStatus == RPC_S_INVALID_BINDING) wprintf(L"[-] An error has occurred during STRING_HANDLE_unbind()...\r\n");
+    if (RpcStatus == RPC_S_INVALID_BINDING) wprintf(L"[-] An error has occurred during STRING_HANDLE_unbind() ...\r\n");
 
     return;
 }
